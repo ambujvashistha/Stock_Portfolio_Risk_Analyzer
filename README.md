@@ -106,15 +106,117 @@ User → Streamlit Frontend → Python Analytics Engine → Risk Models → Visu
 6. Results are visualized using Plotly.
 7. Interactive dashboard displays analytics.
 
-### Architecture Diagram
-(Add system architecture diagram image here)
+### Architecture Diagram :- 
 
----
+
+
+```mermaid
+graph TD
+    %% User Interaction Layer
+    subgraph Client_Layer [User Interface - Streamlit]
+        User([Retail Investor])
+        Dashboard[Interactive Dashboard]
+        Inputs[Tickers, Weights & Parameters]
+    end
+
+    %% Processing & Logic Layer
+    subgraph Logic_Layer [Analytics Engine - Python]
+        Parser[Input Validator]
+        
+        subgraph Engine_Components
+            Calc[Returns & Volatility Calc]
+            MC_Sim[Monte Carlo Engine]
+            Opt[Markowitz Portfolio Optimizer]
+        end
+        
+        Models[Quant Models: VaR, CVaR, Sharpe]
+    end
+
+    %% Data Acquisition Layer
+    subgraph Data_Layer [External Data Source]
+        YF[yfinance API]
+        DB[(Local Cache / CSV)]
+    end
+
+    %% Visualization & Output Layer
+    subgraph Output_Layer [Reporting & Viz]
+        Plotly[Plotly Chart Generator]
+        Report[Risk Summary Table]
+    end
+
+    %% Data Flow Connections
+    User --> Inputs
+    Inputs --> Parser
+    Parser --> YF
+    YF --> DB
+    DB --> Calc
+    
+    Calc --> MC_Sim
+    Calc --> Opt
+    MC_Sim --> Models
+    Opt --> Models
+    
+    Models --> Plotly
+    Models --> Report
+    Plotly --> Dashboard
+    Report --> Dashboard
+    Dashboard --> User
+```
+
+
 
 ## 5. Database Design
 
-### ER Diagram
-(Add ER diagram image here)
+### ER Diagram :- 
+
+
+
+```mermaid
+erDiagram
+    USER ||--o{ PORTFOLIO : owns
+    PORTFOLIO ||--|{ ASSETS : contains
+    ASSETS ||--o{ PRICE_HISTORY : tracks
+    PORTFOLIO ||--|| RISK_REPORT : generates
+
+    USER {
+        string user_id PK
+        string name
+        string email
+    }
+
+    PORTFOLIO {
+        int portfolio_id PK
+        string portfolio_name
+        float total_value
+        float risk_free_rate
+    }
+
+    ASSETS {
+        string ticker_symbol PK
+        float weight
+        float shares_count
+        float average_buy_price
+    }
+
+    PRICE_HISTORY {
+        date trading_date PK
+        string ticker_symbol FK
+        float adj_close
+        float daily_return
+        float volatility
+    }
+
+    RISK_REPORT {
+        int report_id PK
+        float value_at_risk_95
+        float conditional_var
+        float sharpe_ratio
+        float max_drawdown
+        datetime generated_at
+    }
+```
+
+
 
 ### ER Diagram Description
 
